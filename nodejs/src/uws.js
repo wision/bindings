@@ -45,45 +45,6 @@ native.setNoop(noop);
 
 var _upgradeReq = null;
 
-const clientGroup = native.client.group.create(0, DEFAULT_PAYLOAD_LIMIT);
-
-native.client.group.onConnection(clientGroup, (external) => {
-    const webSocket = native.getUserData(external);
-    webSocket.external = external;
-    webSocket.internalOnOpen();
-});
-
-native.client.group.onMessage(clientGroup, (message, webSocket) => {
-    webSocket.internalOnMessage(message);
-});
-
-native.client.group.onDisconnection(clientGroup, (external, code, message, webSocket) => {
-    webSocket.external = null;
-
-    process.nextTick(() => {
-        webSocket.internalOnClose(code, message);
-    });
-
-    native.clearUserData(external);
-});
-
-native.client.group.onPing(clientGroup, (message, webSocket) => {
-    webSocket.onping(message);
-});
-
-native.client.group.onPong(clientGroup, (message, webSocket) => {
-    webSocket.onpong(message);
-});
-
-native.client.group.onError(clientGroup, (webSocket) => {
-    process.nextTick(() => {
-        webSocket.internalOnError({
-            message: 'uWs client connection error',
-            stack: 'uWs client connection error'
-        });
-    });
-});
-
 class WebSocket {
     constructor(external) {
         this.external = external;
@@ -309,8 +270,52 @@ class WebSocket {
 }
 
 class WebSocketClient extends WebSocket {
-    constructor(uri) {
+    constructor(uri, options) {
         super(null);
+
+        if (!options) {
+            options = {};
+        }
+
+        const clientGroup = native.client.group.create(0, options.maxPayload === undefined ? DEFAULT_PAYLOAD_LIMIT : options.maxPayload);
+
+        native.client.group.onConnection(clientGroup, (external) => {
+            const webSocket = native.getUserData(external);
+            webSocket.external = external;
+            webSocket.internalOnOpen();
+        });
+
+        native.client.group.onMessage(clientGroup, (message, webSocket) => {
+            webSocket.internalOnMessage(message);
+        });
+
+        native.client.group.onDisconnection(clientGroup, (external, code, message, webSocket) => {
+            webSocket.external = null;
+
+            process.nextTick(() => {
+                webSocket.internalOnClose(code, message);
+            });
+
+            native.clearUserData(external);
+        });
+
+        native.client.group.onPing(clientGroup, (message, webSocket) => {
+            webSocket.onping(message);
+        });
+
+        native.client.group.onPong(clientGroup, (message, webSocket) => {
+            webSocket.onpong(message);
+        });
+
+        native.client.group.onError(clientGroup, (webSocket) => {
+            process.nextTick(() => {
+                webSocket.internalOnError({
+                    message: 'uWs client connection error',
+                    stack: 'uWs client connection error'
+                });
+            });
+        });
+
         this.internalOnOpen = noop;
         this.internalOnError = noop;
         native.connect(clientGroup, uri, this);
