@@ -2,7 +2,8 @@
   "name": "uws",
   "version": "9.14.0",
   "scripts": {
-    "install": "node-gyp rebuild > build_log.txt 2>&1 || exit 0"
+    "install": "node-gyp rebuild > build_log.txt 2>&1 || exit 0",
+    "postinstall": "node cleanup.js || exit 0"
   },
   "main": "uws.js",
   "description": "Tiny WebSockets",

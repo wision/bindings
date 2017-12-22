@@ -19,6 +19,7 @@ cp src/addon.cpp dist/src/addon.cpp
 cp src/addon.h dist/src/addon.h
 cp src/http.h dist/src/http.h
 cp src/uws.js dist/uws.js
+cp src/cleanup.js dist/cleanup.js
 
 cl /I targets/node-v6.4.0/include/node /EHsc /Ox /LD /Fedist/uws_win32_48.node dist/src/*.cpp targets/node-v6.4.0/node.lib
 cl /I targets/node-v7.1.0/include/node /EHsc /Ox /LD /Fedist/uws_win32_51.node dist/src/*.cpp targets/node-v7.1.0/node.lib
